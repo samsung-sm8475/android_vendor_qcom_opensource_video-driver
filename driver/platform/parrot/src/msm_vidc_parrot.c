@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
- * Copyright (c) 2022-2023 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
  * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
  */
 
@@ -30,12 +30,11 @@
 #define MAX_QP                  51
 #define DEFAULT_QP              20
 #define MAX_CONSTANT_QUALITY    100
-#define MAX_BITRATE_BOOST       25
 #define MIN_SLICE_BYTE_SIZE     512
 #define MAX_SLICE_BYTE_SIZE       \
 	((MAX_BITRATE) >> 3)
 #define MAX_SLICE_MB_SIZE         \
-	(((4096 + 15) >> 4) * ((2176 + 15) >> 4))
+	(((4096 + 15) >> 4) * ((2304 + 15) >> 4))
 #define MAX_SLICE_MB_SIZE_V2      \
 	(((1920 + 15) >> 4) * ((1080 + 15) >> 4))
 
@@ -52,12 +51,12 @@ static struct msm_platform_core_capability core_data_parrot_v0[] = {
 	{ENC_CODECS, H264|HEVC|HEIC},
 	{DEC_CODECS, H264|HEVC|VP9|HEIC},
 	{MAX_SESSION_COUNT, 16},
-	{MAX_NUM_720P_SESSIONS, 8},
-	{MAX_NUM_1080P_SESSIONS, 4},
-	{MAX_NUM_4K_SESSIONS, 2},
+	{MAX_NUM_720P_SESSIONS, 16},
+	{MAX_NUM_1080P_SESSIONS, 8},
+	{MAX_NUM_4K_SESSIONS, 4},
 	{MAX_SECURE_SESSION_COUNT, 3},
-	{MAX_RT_MBPF, 69362}, /* ((4096x2176)/256) x 2 */
-	{MAX_MBPF, 77522}, /* ((4096x2176)/256) x 2 + (1920x1088)/256 */
+	{MAX_RT_MBPF, 97920}, /* ((3840x2176)/256) x 3 */
+	{MAX_MBPF, 110592}, /* ((4096x2304)/256) x 3 */
 	/* Concurrency: UHD@30 decode + 1080p@30 encode */
 	{MAX_MBPS, 2088960}, /* max_load 4096x2176@60fps */
 	{MAX_IMAGE_MBPF, 1048576},  /* (16384x16384)/256 */
@@ -104,13 +103,13 @@ static struct msm_platform_core_capability core_data_parrot_v1[] = {
 	{ENC_CODECS, H264|HEVC|HEIC},
 	{DEC_CODECS, H264|HEVC|VP9|HEIC},
 	{MAX_SESSION_COUNT, 16},
-	{MAX_NUM_720P_SESSIONS, 4},
-	{MAX_NUM_1080P_SESSIONS, 2},
-	{MAX_NUM_4K_SESSIONS, 1},
+	{MAX_NUM_720P_SESSIONS, 16},
+	{MAX_NUM_1080P_SESSIONS, 8},
+	{MAX_NUM_4K_SESSIONS, 4},
 	{MAX_SECURE_SESSION_COUNT, 3},
-	{MAX_RT_MBPF, 40800}, /* ((3840x2176)/256) + (1920x1088)/256 */
-	{MAX_MBPF, 42976}, /* ((4096x2176)/256) + (1920x1088)/256 */
-	/* max_load 4096x2176@30fps */
+	{MAX_RT_MBPF, 97920}, /* ((3840x2176)/256) x 3 */
+	{MAX_MBPF, 110592}, /* ((4096x2304)/256) x 3 */
+	/* max_load 4096x2304@30fps */
 	{MAX_MBPS, 1224000}, /* Concurrency: UHD@30 decode + 1080p@30 encode */
 	{MAX_IMAGE_MBPF, 1048576},  /* (16384x16384)/256 */
 	{MAX_MBPF_HQ, 8160}, /* ((1920x1088)/256) */
@@ -156,13 +155,13 @@ static struct msm_platform_core_capability core_data_parrot_v2[] = {
 	{ENC_CODECS, H264|HEVC|HEIC},
 	{DEC_CODECS, H264|HEVC|VP9|HEIC},
 	{MAX_SESSION_COUNT, 16},
-	{MAX_NUM_720P_SESSIONS, 4},
-	{MAX_NUM_1080P_SESSIONS, 2},
-	{MAX_NUM_4K_SESSIONS, 1},
+	{MAX_NUM_720P_SESSIONS, 16},
+	{MAX_NUM_1080P_SESSIONS, 8},
+	{MAX_NUM_4K_SESSIONS, 4},
 	{MAX_SECURE_SESSION_COUNT, 3},
-	{MAX_RT_MBPF, 40800}, /* ((3840x2176)/256) + (1920x1088)/256 */
-	{MAX_MBPF, 42976}, /* ((4096x2176)/256) + (1920x1088)/256 */
-	/* max_load 4096x2176@30fps */
+	{MAX_RT_MBPF, 97920}, /* ((3840x2176)/256) x 3 */
+	{MAX_MBPF, 110592}, /* ((4096x2304)/256) x 3 */
+	/* max_load 4096x2304@30fps */
 	{MAX_MBPS, 1224000}, /* Concurrency: UHD@30 decode + 1080p@30 encode */
 	{MAX_IMAGE_MBPF, 1048576},  /* (16384x16384)/256 */
 	{MAX_MBPF_HQ, 8160}, /* ((1920x1088)/256) */
@@ -289,12 +288,12 @@ static struct msm_platform_inst_capability instance_data_parrot_v0[] = {
 		HFI_PROP_BUFFER_FW_MIN_OUTPUT_COUNT,
 		CAP_FLAG_ROOT | CAP_FLAG_OUTPUT_PORT},
 
-	/* (4096 * 2176) / 256 */
-	{MBPF, ENC, CODECS_ALL, 64, 34816, 1, 34816},
-	/* (4096 * 2176) / 256 */
-	{MBPF, DEC, CODECS_ALL, 36, 34816, 1, 34816},
-	/* (4096 * 2176) / 256 */
-	{LOSSLESS_MBPF, ENC, H264|HEVC, 64, 34816, 1, 34816},
+	/* (4096 * 2304) / 256 */
+	{MBPF, ENC, CODECS_ALL, 64, 36864, 1, 36864},
+	/* (4096 * 2304) / 256 */
+	{MBPF, DEC, CODECS_ALL, 36, 36864, 1, 36864},
+	/* (4096 * 2304) / 256 */
+	{LOSSLESS_MBPF, ENC, H264|HEVC, 64, 36864, 1, 36864},
 
 	/* Batch Mode Decode */
 	/* BATCH_MBPF + 2 is done for chipsets other than waipio
@@ -305,10 +304,10 @@ static struct msm_platform_inst_capability instance_data_parrot_v0[] = {
 	/* (1920 * 1088) / 256 */
 	{BATCH_MBPF, DEC, H264|HEVC|VP9, 64, 8162, 1, 8162},
 	{BATCH_FPS, DEC, H264|HEVC|VP9, 1, 62, 1, 62},
-	/* (4096 * 2176) / 256 */
-	{SECURE_MBPF, ENC|DEC, H264|HEVC|VP9, 64, 34816, 1, 34816},
-	/* ((4096 * 2176) / 256) * 30 fps */
-	{MBPS, ENC, CODECS_ALL, 64, 1044480, 1, 1044480},
+	/* (4096 * 2304) / 256 */
+	{SECURE_MBPF, ENC|DEC, H264|HEVC|VP9, 64, 36864, 1, 36864},
+	/* ((4096 * 2304) / 256) * 30 fps */
+	{MBPS, ENC, CODECS_ALL, 64, 1105920, 1, 1105920},
 	/* ((4096 * 2176) / 256) * 60 fps */
 	{MBPS, DEC, CODECS_ALL, 36, 2088960, 1, 2088960},
 	/* ((1920 * 1088) / 256) * 30 fps */
@@ -365,7 +364,7 @@ static struct msm_platform_inst_capability instance_data_parrot_v0[] = {
 		{0},
 		NULL, msm_vidc_set_u32},
 
-	{HFLIP, ENC, HEVC|H264,
+	{HFLIP, ENC, CODECS_ALL,
 		V4L2_MPEG_MSM_VIDC_DISABLE,
 		V4L2_MPEG_MSM_VIDC_ENABLE,
 		1, V4L2_MPEG_MSM_VIDC_DISABLE,
@@ -377,7 +376,7 @@ static struct msm_platform_inst_capability instance_data_parrot_v0[] = {
 		{0},
 		NULL, msm_vidc_set_flip},
 
-	{VFLIP, ENC, HEVC|H264,
+	{VFLIP, ENC, CODECS_ALL,
 		V4L2_MPEG_MSM_VIDC_DISABLE,
 		V4L2_MPEG_MSM_VIDC_ENABLE,
 		1, V4L2_MPEG_MSM_VIDC_DISABLE,
@@ -389,7 +388,7 @@ static struct msm_platform_inst_capability instance_data_parrot_v0[] = {
 		{0},
 		NULL, msm_vidc_set_flip},
 
-	{ROTATION, ENC, HEVC|H264,
+	{ROTATION, ENC, CODECS_ALL,
 		0, 270, 90, 0,
 		V4L2_CID_ROTATE,
 		HFI_PROP_ROTATION,
@@ -425,16 +424,6 @@ static struct msm_platform_inst_capability instance_data_parrot_v0[] = {
 		V4L2_MPEG_MSM_VIDC_ENABLE,
 		1, V4L2_MPEG_MSM_VIDC_DISABLE,
 		V4L2_CID_MPEG_VIDEO_PREPEND_SPSPPS_TO_IDR},
-
-	{VUI_TIMING_INFO, ENC, CODECS_ALL,
-		V4L2_MPEG_MSM_VIDC_DISABLE,
-		V4L2_MPEG_MSM_VIDC_ENABLE,
-		1, V4L2_MPEG_MSM_VIDC_DISABLE,
-		V4L2_CID_MPEG_VIDC_VUI_TIMING_INFO,
-		HFI_PROP_DISABLE_VUI_TIMING_INFO,
-		CAP_FLAG_OUTPUT_PORT,
-		{0}, {0},
-		NULL, msm_vidc_set_vui_timing_info},
 
 	{META_SEQ_HDR_NAL, ENC, CODECS_ALL,
 		V4L2_MPEG_MSM_VIDC_DISABLE,
@@ -575,6 +564,15 @@ static struct msm_platform_inst_capability instance_data_parrot_v0[] = {
 		{ALL_INTRA},
 		msm_vidc_adjust_b_frame, msm_vidc_set_u32},
 
+	{BLUR_TYPES, ENC, CODECS_ALL,
+		VIDC_BLUR_NONE, VIDC_BLUR_ADAPTIVE, 1, VIDC_BLUR_ADAPTIVE,
+		V4L2_CID_MPEG_VIDC_VIDEO_BLUR_TYPES,
+		HFI_PROP_BLUR_TYPES,
+		CAP_FLAG_OUTPUT_PORT,
+		{PIX_FMTS, BITRATE_MODE, CONTENT_ADAPTIVE_CODING},
+		{BLUR_RESOLUTION},
+		msm_vidc_adjust_blur_type, msm_vidc_set_u32_enum},
+
 	{BLUR_TYPES, ENC, H264|HEVC,
 		VIDC_BLUR_NONE, VIDC_BLUR_ADAPTIVE, 1, VIDC_BLUR_ADAPTIVE,
 		V4L2_CID_MPEG_VIDC_VIDEO_BLUR_TYPES,
@@ -584,7 +582,7 @@ static struct msm_platform_inst_capability instance_data_parrot_v0[] = {
 		{BLUR_RESOLUTION},
 		msm_vidc_adjust_blur_type, msm_vidc_set_u32_enum},
 
-	{BLUR_RESOLUTION, ENC, H264|HEVC,
+	{BLUR_RESOLUTION, ENC, CODECS_ALL,
 		0, S32_MAX, 1, 0,
 		V4L2_CID_MPEG_VIDC_VIDEO_BLUR_RESOLUTION,
 		HFI_PROP_BLUR_RESOLUTION,
@@ -626,7 +624,7 @@ static struct msm_platform_inst_capability instance_data_parrot_v0[] = {
 		1, V4L2_MPEG_MSM_VIDC_DISABLE,
 		V4L2_CID_MPEG_VIDC_LOWLATENCY_REQUEST,
 		HFI_PROP_SEQ_CHANGE_AT_SYNC_FRAME,
-		CAP_FLAG_INPUT_PORT},
+		CAP_FLAG_INPUT_PORT | CAP_FLAG_DYNAMIC_ALLOWED},
 
 	{LTR_COUNT, ENC, H264|HEVC,
 		0, 2, 1, 0,
@@ -701,8 +699,7 @@ static struct msm_platform_inst_capability instance_data_parrot_v0[] = {
 		msm_vidc_set_vbr_related_properties},
 
 	{BITRATE_BOOST, ENC, H264|HEVC,
-		0, MAX_BITRATE_BOOST,
-		MAX_BITRATE_BOOST, MAX_BITRATE_BOOST,
+		0, MAX_BITRATE_BOOST, 25, MAX_BITRATE_BOOST,
 		V4L2_CID_MPEG_VIDC_QUALITY_BITRATE_BOOST,
 		HFI_PROP_BITRATE_BOOST,
 		CAP_FLAG_OUTPUT_PORT,
@@ -1204,7 +1201,7 @@ static struct msm_platform_inst_capability instance_data_parrot_v0[] = {
 
 	{LEVEL, ENC, H264,
 		V4L2_MPEG_VIDEO_H264_LEVEL_1_0,
-		V4L2_MPEG_VIDEO_H264_LEVEL_5_1,
+		V4L2_MPEG_VIDEO_H264_LEVEL_5_2,
 		BIT(V4L2_MPEG_VIDEO_H264_LEVEL_1_0) |
 		BIT(V4L2_MPEG_VIDEO_H264_LEVEL_1B) |
 		BIT(V4L2_MPEG_VIDEO_H264_LEVEL_1_1) |
@@ -1220,8 +1217,9 @@ static struct msm_platform_inst_capability instance_data_parrot_v0[] = {
 		BIT(V4L2_MPEG_VIDEO_H264_LEVEL_4_1) |
 		BIT(V4L2_MPEG_VIDEO_H264_LEVEL_4_2) |
 		BIT(V4L2_MPEG_VIDEO_H264_LEVEL_5_0) |
-		BIT(V4L2_MPEG_VIDEO_H264_LEVEL_5_1),
-		V4L2_MPEG_VIDEO_H264_LEVEL_5_1,
+		BIT(V4L2_MPEG_VIDEO_H264_LEVEL_5_1) |
+		BIT(V4L2_MPEG_VIDEO_H264_LEVEL_5_2),
+		V4L2_MPEG_VIDEO_H264_LEVEL_5_2,
 		V4L2_CID_MPEG_VIDEO_H264_LEVEL,
 		HFI_PROP_LEVEL,
 		CAP_FLAG_ROOT | CAP_FLAG_OUTPUT_PORT | CAP_FLAG_MENU,
@@ -1251,7 +1249,7 @@ static struct msm_platform_inst_capability instance_data_parrot_v0[] = {
 
 	{LEVEL, ENC, HEVC|HEIC,
 		V4L2_MPEG_VIDEO_HEVC_LEVEL_1,
-		V4L2_MPEG_VIDEO_HEVC_LEVEL_5,
+		V4L2_MPEG_VIDEO_HEVC_LEVEL_5_1,
 		BIT(V4L2_MPEG_VIDEO_HEVC_LEVEL_1) |
 		BIT(V4L2_MPEG_VIDEO_HEVC_LEVEL_2) |
 		BIT(V4L2_MPEG_VIDEO_HEVC_LEVEL_2_1) |
@@ -1259,8 +1257,9 @@ static struct msm_platform_inst_capability instance_data_parrot_v0[] = {
 		BIT(V4L2_MPEG_VIDEO_HEVC_LEVEL_3_1) |
 		BIT(V4L2_MPEG_VIDEO_HEVC_LEVEL_4) |
 		BIT(V4L2_MPEG_VIDEO_HEVC_LEVEL_4_1) |
-		BIT(V4L2_MPEG_VIDEO_HEVC_LEVEL_5),
-		V4L2_MPEG_VIDEO_HEVC_LEVEL_5,
+		BIT(V4L2_MPEG_VIDEO_HEVC_LEVEL_5) |
+		BIT(V4L2_MPEG_VIDEO_HEVC_LEVEL_5_1),
+		V4L2_MPEG_VIDEO_HEVC_LEVEL_5_1,
 		V4L2_CID_MPEG_VIDEO_HEVC_LEVEL,
 		HFI_PROP_LEVEL,
 		CAP_FLAG_ROOT | CAP_FLAG_OUTPUT_PORT | CAP_FLAG_MENU,
@@ -1579,7 +1578,7 @@ static struct msm_platform_inst_capability instance_data_parrot_v0[] = {
 		V4L2_CID_MPEG_VIDC_METADATA_SEI_CONTENT_LIGHT_LEVEL,
 		HFI_PROP_SEI_CONTENT_LIGHT_LEVEL},
 
-	{META_HDR10PLUS, DEC, HEVC|HEIC,
+	{META_HDR10PLUS, DEC | ENC, HEVC|HEIC,
 		V4L2_MPEG_MSM_VIDC_DISABLE, V4L2_MPEG_MSM_VIDC_ENABLE,
 		1, V4L2_MPEG_MSM_VIDC_DISABLE,
 		V4L2_CID_MPEG_VIDC_METADATA_HDR10PLUS,
@@ -1840,12 +1839,12 @@ static struct msm_platform_inst_capability instance_data_parrot_v1[] = {
 		HFI_PROP_BUFFER_FW_MIN_OUTPUT_COUNT,
 		CAP_FLAG_ROOT | CAP_FLAG_OUTPUT_PORT},
 
-	/* (4096 * 2176) / 256 */
-	{MBPF, ENC, CODECS_ALL, 64, 34816, 1, 34816},
-	/* (4096 * 2176) / 256 */
-	{MBPF, DEC, CODECS_ALL, 36, 34816, 1, 34816},
-	/* (4096 * 2176) / 256 */
-	{LOSSLESS_MBPF, ENC, H264|HEVC, 64, 34816, 1, 34816},
+	/* (4096 * 2304) / 256 */
+	{MBPF, ENC, CODECS_ALL, 64, 36864, 1, 36864},
+	/* (4096 * 2304) / 256 */
+	{MBPF, DEC, CODECS_ALL, 36, 36864, 1, 36864},
+	/* (4096 * 2304) / 256 */
+	{LOSSLESS_MBPF, ENC, H264|HEVC, 64, 36864, 1, 36864},
 
 	/* Batch Mode Decode */
 	/* BATCH_MBPF + 2 is done for chipsets other than waipio
@@ -1856,12 +1855,12 @@ static struct msm_platform_inst_capability instance_data_parrot_v1[] = {
 	/* (1920 * 1088) / 256 */
 	{BATCH_MBPF, DEC, H264|HEVC|VP9, 64, 8162, 1, 8162},
 	{BATCH_FPS, DEC, H264|HEVC|VP9, 1, 62, 1, 62},
-	/* (4096 * 2176) / 256 */
-	{SECURE_MBPF, ENC|DEC, H264|HEVC|VP9, 64, 34816, 1, 34816},
-	/* ((4096 * 2176) / 256) * 30 fps */
-	{MBPS, ENC, CODECS_ALL, 64, 1088840, 1, 1088840},
-	/* ((4096 * 2176) / 256) * 30 fps */
-	{MBPS, DEC, CODECS_ALL, 36, 1088840, 1, 1088840},
+	/* (4096 * 2304) / 256 */
+	{SECURE_MBPF, ENC|DEC, H264|HEVC|VP9, 64, 36864, 1, 36864},
+	/* ((4096 * 2304) / 256) * 30 fps */
+	{MBPS, ENC, CODECS_ALL, 64, 1105920, 1, 1105920},
+	/* ((4096 * 2304) / 256) * 30 fps */
+	{MBPS, DEC, CODECS_ALL, 36, 1105920, 1, 1105920},
 	/* ((1920 * 1088) / 256) * 30 fps */
 	{POWER_SAVE_MBPS, ENC, CODECS_ALL, 0, 244800, 1, 244800},
 
@@ -1916,7 +1915,7 @@ static struct msm_platform_inst_capability instance_data_parrot_v1[] = {
 		{0},
 		NULL, msm_vidc_set_u32},
 
-	{HFLIP, ENC, HEVC|H264,
+	{HFLIP, ENC, CODECS_ALL,
 		V4L2_MPEG_MSM_VIDC_DISABLE,
 		V4L2_MPEG_MSM_VIDC_ENABLE,
 		1, V4L2_MPEG_MSM_VIDC_DISABLE,
@@ -1928,7 +1927,7 @@ static struct msm_platform_inst_capability instance_data_parrot_v1[] = {
 		{0},
 		NULL, msm_vidc_set_flip},
 
-	{VFLIP, ENC, HEVC|H264,
+	{VFLIP, ENC, CODECS_ALL,
 		V4L2_MPEG_MSM_VIDC_DISABLE,
 		V4L2_MPEG_MSM_VIDC_ENABLE,
 		1, V4L2_MPEG_MSM_VIDC_DISABLE,
@@ -1940,7 +1939,7 @@ static struct msm_platform_inst_capability instance_data_parrot_v1[] = {
 		{0},
 		NULL, msm_vidc_set_flip},
 
-	{ROTATION, ENC, HEVC|H264,
+	{ROTATION, ENC, CODECS_ALL,
 		0, 270, 90, 0,
 		V4L2_CID_ROTATE,
 		HFI_PROP_ROTATION,
@@ -1976,16 +1975,6 @@ static struct msm_platform_inst_capability instance_data_parrot_v1[] = {
 		V4L2_MPEG_MSM_VIDC_ENABLE,
 		1, V4L2_MPEG_MSM_VIDC_DISABLE,
 		V4L2_CID_MPEG_VIDEO_PREPEND_SPSPPS_TO_IDR},
-
-	{VUI_TIMING_INFO, ENC, CODECS_ALL,
-		V4L2_MPEG_MSM_VIDC_DISABLE,
-		V4L2_MPEG_MSM_VIDC_ENABLE,
-		1, V4L2_MPEG_MSM_VIDC_DISABLE,
-		V4L2_CID_MPEG_VIDC_VUI_TIMING_INFO,
-		HFI_PROP_DISABLE_VUI_TIMING_INFO,
-		CAP_FLAG_OUTPUT_PORT,
-		{0}, {0},
-		NULL, msm_vidc_set_vui_timing_info},
 
 	{META_SEQ_HDR_NAL, ENC, CODECS_ALL,
 		V4L2_MPEG_MSM_VIDC_DISABLE,
@@ -2126,6 +2115,15 @@ static struct msm_platform_inst_capability instance_data_parrot_v1[] = {
 		{ALL_INTRA},
 		msm_vidc_adjust_b_frame, msm_vidc_set_u32},
 
+	{BLUR_TYPES, ENC, CODECS_ALL,
+		VIDC_BLUR_NONE, VIDC_BLUR_ADAPTIVE, 1, VIDC_BLUR_ADAPTIVE,
+		V4L2_CID_MPEG_VIDC_VIDEO_BLUR_TYPES,
+		HFI_PROP_BLUR_TYPES,
+		CAP_FLAG_OUTPUT_PORT,
+		{PIX_FMTS, BITRATE_MODE, CONTENT_ADAPTIVE_CODING},
+		{BLUR_RESOLUTION},
+		msm_vidc_adjust_blur_type, msm_vidc_set_u32_enum},
+
 	{BLUR_TYPES, ENC, H264|HEVC,
 		VIDC_BLUR_NONE, VIDC_BLUR_ADAPTIVE, 1, VIDC_BLUR_ADAPTIVE,
 		V4L2_CID_MPEG_VIDC_VIDEO_BLUR_TYPES,
@@ -2135,7 +2133,7 @@ static struct msm_platform_inst_capability instance_data_parrot_v1[] = {
 		{BLUR_RESOLUTION},
 		msm_vidc_adjust_blur_type, msm_vidc_set_u32_enum},
 
-	{BLUR_RESOLUTION, ENC, H264|HEVC,
+	{BLUR_RESOLUTION, ENC, CODECS_ALL,
 		0, S32_MAX, 1, 0,
 		V4L2_CID_MPEG_VIDC_VIDEO_BLUR_RESOLUTION,
 		HFI_PROP_BLUR_RESOLUTION,
@@ -2177,7 +2175,7 @@ static struct msm_platform_inst_capability instance_data_parrot_v1[] = {
 		1, V4L2_MPEG_MSM_VIDC_DISABLE,
 		V4L2_CID_MPEG_VIDC_LOWLATENCY_REQUEST,
 		HFI_PROP_SEQ_CHANGE_AT_SYNC_FRAME,
-		CAP_FLAG_INPUT_PORT},
+		CAP_FLAG_INPUT_PORT | CAP_FLAG_DYNAMIC_ALLOWED},
 
 	{LTR_COUNT, ENC, H264|HEVC,
 		0, 2, 1, 0,
@@ -2252,8 +2250,7 @@ static struct msm_platform_inst_capability instance_data_parrot_v1[] = {
 		msm_vidc_set_vbr_related_properties},
 
 	{BITRATE_BOOST, ENC, H264|HEVC,
-		0, MAX_BITRATE_BOOST,
-		MAX_BITRATE_BOOST, MAX_BITRATE_BOOST,
+		0, MAX_BITRATE_BOOST, 25, MAX_BITRATE_BOOST,
 		V4L2_CID_MPEG_VIDC_QUALITY_BITRATE_BOOST,
 		HFI_PROP_BITRATE_BOOST,
 		CAP_FLAG_OUTPUT_PORT,
@@ -2706,7 +2703,7 @@ static struct msm_platform_inst_capability instance_data_parrot_v1[] = {
 
 	{LEVEL, DEC, VP9,
 		V4L2_MPEG_VIDEO_VP9_LEVEL_1_0,
-		V4L2_MPEG_VIDEO_VP9_LEVEL_5_0,
+		V4L2_MPEG_VIDEO_VP9_LEVEL_5_1,
 		BIT(V4L2_MPEG_VIDEO_VP9_LEVEL_1_0) |
 		BIT(V4L2_MPEG_VIDEO_VP9_LEVEL_1_1) |
 		BIT(V4L2_MPEG_VIDEO_VP9_LEVEL_2_0) |
@@ -2715,8 +2712,9 @@ static struct msm_platform_inst_capability instance_data_parrot_v1[] = {
 		BIT(V4L2_MPEG_VIDEO_VP9_LEVEL_3_1) |
 		BIT(V4L2_MPEG_VIDEO_VP9_LEVEL_4_0) |
 		BIT(V4L2_MPEG_VIDEO_VP9_LEVEL_4_1) |
-		BIT(V4L2_MPEG_VIDEO_VP9_LEVEL_5_0),
-		V4L2_MPEG_VIDEO_VP9_LEVEL_5_0,
+		BIT(V4L2_MPEG_VIDEO_VP9_LEVEL_5_0) |
+		BIT(V4L2_MPEG_VIDEO_VP9_LEVEL_5_1),
+		V4L2_MPEG_VIDEO_VP9_LEVEL_5_1,
 		V4L2_CID_MPEG_VIDEO_VP9_LEVEL,
 		HFI_PROP_LEVEL,
 		CAP_FLAG_ROOT | CAP_FLAG_OUTPUT_PORT | CAP_FLAG_MENU,
@@ -2726,7 +2724,7 @@ static struct msm_platform_inst_capability instance_data_parrot_v1[] = {
 
 	{LEVEL, DEC, H264,
 		V4L2_MPEG_VIDEO_H264_LEVEL_1_0,
-		V4L2_MPEG_VIDEO_H264_LEVEL_5_1,
+		V4L2_MPEG_VIDEO_H264_LEVEL_5_2,
 		BIT(V4L2_MPEG_VIDEO_H264_LEVEL_1_0) |
 		BIT(V4L2_MPEG_VIDEO_H264_LEVEL_1B) |
 		BIT(V4L2_MPEG_VIDEO_H264_LEVEL_1_1) |
@@ -2742,8 +2740,9 @@ static struct msm_platform_inst_capability instance_data_parrot_v1[] = {
 		BIT(V4L2_MPEG_VIDEO_H264_LEVEL_4_1) |
 		BIT(V4L2_MPEG_VIDEO_H264_LEVEL_4_2) |
 		BIT(V4L2_MPEG_VIDEO_H264_LEVEL_5_0) |
-		BIT(V4L2_MPEG_VIDEO_H264_LEVEL_5_1),
-		V4L2_MPEG_VIDEO_H264_LEVEL_5_1,
+		BIT(V4L2_MPEG_VIDEO_H264_LEVEL_5_1) |
+		BIT(V4L2_MPEG_VIDEO_H264_LEVEL_5_2),
+		V4L2_MPEG_VIDEO_H264_LEVEL_5_2,
 		V4L2_CID_MPEG_VIDEO_H264_LEVEL,
 		HFI_PROP_LEVEL,
 		CAP_FLAG_ROOT | CAP_FLAG_OUTPUT_PORT | CAP_FLAG_MENU,
@@ -2753,7 +2752,7 @@ static struct msm_platform_inst_capability instance_data_parrot_v1[] = {
 
 	{LEVEL, ENC, H264,
 		V4L2_MPEG_VIDEO_H264_LEVEL_1_0,
-		V4L2_MPEG_VIDEO_H264_LEVEL_5_1,
+		V4L2_MPEG_VIDEO_H264_LEVEL_5_2,
 		BIT(V4L2_MPEG_VIDEO_H264_LEVEL_1_0) |
 		BIT(V4L2_MPEG_VIDEO_H264_LEVEL_1B) |
 		BIT(V4L2_MPEG_VIDEO_H264_LEVEL_1_1) |
@@ -2769,8 +2768,9 @@ static struct msm_platform_inst_capability instance_data_parrot_v1[] = {
 		BIT(V4L2_MPEG_VIDEO_H264_LEVEL_4_1) |
 		BIT(V4L2_MPEG_VIDEO_H264_LEVEL_4_2) |
 		BIT(V4L2_MPEG_VIDEO_H264_LEVEL_5_0) |
-		BIT(V4L2_MPEG_VIDEO_H264_LEVEL_5_1),
-		V4L2_MPEG_VIDEO_H264_LEVEL_5_1,
+		BIT(V4L2_MPEG_VIDEO_H264_LEVEL_5_1) |
+		BIT(V4L2_MPEG_VIDEO_H264_LEVEL_5_2),
+		V4L2_MPEG_VIDEO_H264_LEVEL_5_2,
 		V4L2_CID_MPEG_VIDEO_H264_LEVEL,
 		HFI_PROP_LEVEL,
 		CAP_FLAG_ROOT | CAP_FLAG_OUTPUT_PORT | CAP_FLAG_MENU,
@@ -2780,7 +2780,7 @@ static struct msm_platform_inst_capability instance_data_parrot_v1[] = {
 
 	{LEVEL, DEC, HEVC|HEIC,
 		V4L2_MPEG_VIDEO_HEVC_LEVEL_1,
-		V4L2_MPEG_VIDEO_HEVC_LEVEL_5,
+		V4L2_MPEG_VIDEO_HEVC_LEVEL_5_1,
 		BIT(V4L2_MPEG_VIDEO_HEVC_LEVEL_1) |
 		BIT(V4L2_MPEG_VIDEO_HEVC_LEVEL_2) |
 		BIT(V4L2_MPEG_VIDEO_HEVC_LEVEL_2_1) |
@@ -2788,8 +2788,9 @@ static struct msm_platform_inst_capability instance_data_parrot_v1[] = {
 		BIT(V4L2_MPEG_VIDEO_HEVC_LEVEL_3_1) |
 		BIT(V4L2_MPEG_VIDEO_HEVC_LEVEL_4) |
 		BIT(V4L2_MPEG_VIDEO_HEVC_LEVEL_4_1) |
-		BIT(V4L2_MPEG_VIDEO_HEVC_LEVEL_5),
-		V4L2_MPEG_VIDEO_HEVC_LEVEL_5,
+		BIT(V4L2_MPEG_VIDEO_HEVC_LEVEL_5) |
+		BIT(V4L2_MPEG_VIDEO_HEVC_LEVEL_5_1),
+		V4L2_MPEG_VIDEO_HEVC_LEVEL_5_1,
 		V4L2_CID_MPEG_VIDEO_HEVC_LEVEL,
 		HFI_PROP_LEVEL,
 		CAP_FLAG_ROOT | CAP_FLAG_OUTPUT_PORT | CAP_FLAG_MENU,
@@ -2799,7 +2800,7 @@ static struct msm_platform_inst_capability instance_data_parrot_v1[] = {
 
 	{LEVEL, ENC, HEVC|HEIC,
 		V4L2_MPEG_VIDEO_HEVC_LEVEL_1,
-		V4L2_MPEG_VIDEO_HEVC_LEVEL_5,
+		V4L2_MPEG_VIDEO_HEVC_LEVEL_5_1,
 		BIT(V4L2_MPEG_VIDEO_HEVC_LEVEL_1) |
 		BIT(V4L2_MPEG_VIDEO_HEVC_LEVEL_2) |
 		BIT(V4L2_MPEG_VIDEO_HEVC_LEVEL_2_1) |
@@ -2807,8 +2808,9 @@ static struct msm_platform_inst_capability instance_data_parrot_v1[] = {
 		BIT(V4L2_MPEG_VIDEO_HEVC_LEVEL_3_1) |
 		BIT(V4L2_MPEG_VIDEO_HEVC_LEVEL_4) |
 		BIT(V4L2_MPEG_VIDEO_HEVC_LEVEL_4_1) |
-		BIT(V4L2_MPEG_VIDEO_HEVC_LEVEL_5),
-		V4L2_MPEG_VIDEO_HEVC_LEVEL_5,
+		BIT(V4L2_MPEG_VIDEO_HEVC_LEVEL_5) |
+		BIT(V4L2_MPEG_VIDEO_HEVC_LEVEL_5_1),
+		V4L2_MPEG_VIDEO_HEVC_LEVEL_5_1,
 		V4L2_CID_MPEG_VIDEO_HEVC_LEVEL,
 		HFI_PROP_LEVEL,
 		CAP_FLAG_ROOT | CAP_FLAG_OUTPUT_PORT | CAP_FLAG_MENU,
@@ -3127,7 +3129,7 @@ static struct msm_platform_inst_capability instance_data_parrot_v1[] = {
 		V4L2_CID_MPEG_VIDC_METADATA_SEI_CONTENT_LIGHT_LEVEL,
 		HFI_PROP_SEI_CONTENT_LIGHT_LEVEL},
 
-	{META_HDR10PLUS, DEC, HEVC|HEIC,
+	{META_HDR10PLUS, DEC | ENC, HEVC|HEIC,
 		V4L2_MPEG_MSM_VIDC_DISABLE, V4L2_MPEG_MSM_VIDC_ENABLE,
 		1, V4L2_MPEG_MSM_VIDC_DISABLE,
 		V4L2_CID_MPEG_VIDC_METADATA_HDR10PLUS,
@@ -3388,8 +3390,8 @@ static struct msm_platform_inst_capability instance_data_parrot_v2[] = {
 
 	/* (1920 * 1088) / 256 */
 	{MBPF, ENC, CODECS_ALL, 64, 8160, 1, 8160},
-	/* (4096 * 2176) / 256 */
-	{MBPF, DEC, CODECS_ALL, 36, 34816, 1, 34816},
+	/* (4096 * 2304) / 256 */
+	{MBPF, DEC, CODECS_ALL, 36, 36864, 1, 36864},
 	/* (1920 * 1088) / 256 */
 	{LOSSLESS_MBPF, ENC, H264|HEVC, 64, 8160, 1, 8160},
 
@@ -3406,8 +3408,8 @@ static struct msm_platform_inst_capability instance_data_parrot_v2[] = {
 	{SECURE_MBPF, ENC|DEC, H264|HEVC|VP9, 64, 8160, 1, 8160},
 	/* ((1920 * 1088) / 256) * 60 fps */
 	{MBPS, ENC, CODECS_ALL, 64, 489600, 1, 489600},
-	/* ((4096 * 2176) / 256) * 30 fps */
-	{MBPS, DEC, CODECS_ALL, 36, 1088840, 1, 1088840},
+	/* ((4096 * 2304) / 256) * 30 fps */
+	{MBPS, DEC, CODECS_ALL, 36, 1105920, 1, 1105920},
 	/* ((1920 * 1088) / 256) * 30 fps */
 	{POWER_SAVE_MBPS, ENC, CODECS_ALL, 0, 244800, 1, 244800},
 
@@ -3462,7 +3464,7 @@ static struct msm_platform_inst_capability instance_data_parrot_v2[] = {
 		{0},
 		NULL, msm_vidc_set_u32},
 
-	{HFLIP, ENC, HEVC|H264,
+	{HFLIP, ENC, CODECS_ALL,
 		V4L2_MPEG_MSM_VIDC_DISABLE,
 		V4L2_MPEG_MSM_VIDC_ENABLE,
 		1, V4L2_MPEG_MSM_VIDC_DISABLE,
@@ -3474,7 +3476,7 @@ static struct msm_platform_inst_capability instance_data_parrot_v2[] = {
 		{0},
 		NULL, msm_vidc_set_flip},
 
-	{VFLIP, ENC, HEVC|H264,
+	{VFLIP, ENC, CODECS_ALL,
 		V4L2_MPEG_MSM_VIDC_DISABLE,
 		V4L2_MPEG_MSM_VIDC_ENABLE,
 		1, V4L2_MPEG_MSM_VIDC_DISABLE,
@@ -3486,7 +3488,7 @@ static struct msm_platform_inst_capability instance_data_parrot_v2[] = {
 		{0},
 		NULL, msm_vidc_set_flip},
 
-	{ROTATION, ENC, HEVC|H264,
+	{ROTATION, ENC, CODECS_ALL,
 		0, 270, 90, 0,
 		V4L2_CID_ROTATE,
 		HFI_PROP_ROTATION,
@@ -3522,16 +3524,6 @@ static struct msm_platform_inst_capability instance_data_parrot_v2[] = {
 		V4L2_MPEG_MSM_VIDC_ENABLE,
 		1, V4L2_MPEG_MSM_VIDC_DISABLE,
 		V4L2_CID_MPEG_VIDEO_PREPEND_SPSPPS_TO_IDR},
-
-	{VUI_TIMING_INFO, ENC, CODECS_ALL,
-		V4L2_MPEG_MSM_VIDC_DISABLE,
-		V4L2_MPEG_MSM_VIDC_ENABLE,
-		1, V4L2_MPEG_MSM_VIDC_DISABLE,
-		V4L2_CID_MPEG_VIDC_VUI_TIMING_INFO,
-		HFI_PROP_DISABLE_VUI_TIMING_INFO,
-		CAP_FLAG_OUTPUT_PORT,
-		{0}, {0},
-		NULL, msm_vidc_set_vui_timing_info},
 
 	{META_SEQ_HDR_NAL, ENC, CODECS_ALL,
 		V4L2_MPEG_MSM_VIDC_DISABLE,
@@ -3672,6 +3664,15 @@ static struct msm_platform_inst_capability instance_data_parrot_v2[] = {
 		{ALL_INTRA},
 		msm_vidc_adjust_b_frame, msm_vidc_set_u32},
 
+	{BLUR_TYPES, ENC, CODECS_ALL,
+		VIDC_BLUR_NONE, VIDC_BLUR_ADAPTIVE, 1, VIDC_BLUR_ADAPTIVE,
+		V4L2_CID_MPEG_VIDC_VIDEO_BLUR_TYPES,
+		HFI_PROP_BLUR_TYPES,
+		CAP_FLAG_OUTPUT_PORT,
+		{PIX_FMTS, BITRATE_MODE, CONTENT_ADAPTIVE_CODING},
+		{BLUR_RESOLUTION},
+		msm_vidc_adjust_blur_type, msm_vidc_set_u32_enum},
+
 	{BLUR_TYPES, ENC, H264|HEVC,
 		VIDC_BLUR_NONE, VIDC_BLUR_ADAPTIVE, 1, VIDC_BLUR_ADAPTIVE,
 		V4L2_CID_MPEG_VIDC_VIDEO_BLUR_TYPES,
@@ -3681,7 +3682,7 @@ static struct msm_platform_inst_capability instance_data_parrot_v2[] = {
 		{BLUR_RESOLUTION},
 		msm_vidc_adjust_blur_type, msm_vidc_set_u32_enum},
 
-	{BLUR_RESOLUTION, ENC, H264|HEVC,
+	{BLUR_RESOLUTION, ENC, CODECS_ALL,
 		0, S32_MAX, 1, 0,
 		V4L2_CID_MPEG_VIDC_VIDEO_BLUR_RESOLUTION,
 		HFI_PROP_BLUR_RESOLUTION,
@@ -3723,7 +3724,7 @@ static struct msm_platform_inst_capability instance_data_parrot_v2[] = {
 		1, V4L2_MPEG_MSM_VIDC_DISABLE,
 		V4L2_CID_MPEG_VIDC_LOWLATENCY_REQUEST,
 		HFI_PROP_SEQ_CHANGE_AT_SYNC_FRAME,
-		CAP_FLAG_INPUT_PORT},
+		CAP_FLAG_INPUT_PORT | CAP_FLAG_DYNAMIC_ALLOWED},
 
 	{LTR_COUNT, ENC, H264|HEVC,
 		0, 2, 1, 0,
@@ -3798,8 +3799,7 @@ static struct msm_platform_inst_capability instance_data_parrot_v2[] = {
 		msm_vidc_set_vbr_related_properties},
 
 	{BITRATE_BOOST, ENC, H264|HEVC,
-		0, MAX_BITRATE_BOOST,
-		MAX_BITRATE_BOOST, MAX_BITRATE_BOOST,
+		0, MAX_BITRATE_BOOST, 25, MAX_BITRATE_BOOST,
 		V4L2_CID_MPEG_VIDC_QUALITY_BITRATE_BOOST,
 		HFI_PROP_BITRATE_BOOST,
 		CAP_FLAG_OUTPUT_PORT,
@@ -4250,7 +4250,7 @@ static struct msm_platform_inst_capability instance_data_parrot_v2[] = {
 
 	{LEVEL, DEC, VP9,
 		V4L2_MPEG_VIDEO_VP9_LEVEL_1_0,
-		V4L2_MPEG_VIDEO_VP9_LEVEL_5_0,
+		V4L2_MPEG_VIDEO_VP9_LEVEL_5_1,
 		BIT(V4L2_MPEG_VIDEO_VP9_LEVEL_1_0) |
 		BIT(V4L2_MPEG_VIDEO_VP9_LEVEL_1_1) |
 		BIT(V4L2_MPEG_VIDEO_VP9_LEVEL_2_0) |
@@ -4259,8 +4259,9 @@ static struct msm_platform_inst_capability instance_data_parrot_v2[] = {
 		BIT(V4L2_MPEG_VIDEO_VP9_LEVEL_3_1) |
 		BIT(V4L2_MPEG_VIDEO_VP9_LEVEL_4_0) |
 		BIT(V4L2_MPEG_VIDEO_VP9_LEVEL_4_1) |
-		BIT(V4L2_MPEG_VIDEO_VP9_LEVEL_5_0),
-		V4L2_MPEG_VIDEO_VP9_LEVEL_5_0,
+		BIT(V4L2_MPEG_VIDEO_VP9_LEVEL_5_0) |
+		BIT(V4L2_MPEG_VIDEO_VP9_LEVEL_5_1),
+		V4L2_MPEG_VIDEO_VP9_LEVEL_5_1,
 		V4L2_CID_MPEG_VIDEO_VP9_LEVEL,
 		HFI_PROP_LEVEL,
 		CAP_FLAG_ROOT | CAP_FLAG_OUTPUT_PORT | CAP_FLAG_MENU,
@@ -4270,7 +4271,7 @@ static struct msm_platform_inst_capability instance_data_parrot_v2[] = {
 
 	{LEVEL, DEC, H264,
 		V4L2_MPEG_VIDEO_H264_LEVEL_1_0,
-		V4L2_MPEG_VIDEO_H264_LEVEL_5_1,
+		V4L2_MPEG_VIDEO_H264_LEVEL_5_2,
 		BIT(V4L2_MPEG_VIDEO_H264_LEVEL_1_0) |
 		BIT(V4L2_MPEG_VIDEO_H264_LEVEL_1B) |
 		BIT(V4L2_MPEG_VIDEO_H264_LEVEL_1_1) |
@@ -4286,8 +4287,9 @@ static struct msm_platform_inst_capability instance_data_parrot_v2[] = {
 		BIT(V4L2_MPEG_VIDEO_H264_LEVEL_4_1) |
 		BIT(V4L2_MPEG_VIDEO_H264_LEVEL_4_2) |
 		BIT(V4L2_MPEG_VIDEO_H264_LEVEL_5_0) |
-		BIT(V4L2_MPEG_VIDEO_H264_LEVEL_5_1),
-		V4L2_MPEG_VIDEO_H264_LEVEL_5_1,
+		BIT(V4L2_MPEG_VIDEO_H264_LEVEL_5_1) |
+		BIT(V4L2_MPEG_VIDEO_H264_LEVEL_5_2),
+		V4L2_MPEG_VIDEO_H264_LEVEL_5_2,
 		V4L2_CID_MPEG_VIDEO_H264_LEVEL,
 		HFI_PROP_LEVEL,
 		CAP_FLAG_ROOT | CAP_FLAG_OUTPUT_PORT | CAP_FLAG_MENU,
@@ -4322,7 +4324,7 @@ static struct msm_platform_inst_capability instance_data_parrot_v2[] = {
 
 	{LEVEL, DEC, HEVC|HEIC,
 		V4L2_MPEG_VIDEO_HEVC_LEVEL_1,
-		V4L2_MPEG_VIDEO_HEVC_LEVEL_5,
+		V4L2_MPEG_VIDEO_HEVC_LEVEL_5_1,
 		BIT(V4L2_MPEG_VIDEO_HEVC_LEVEL_1) |
 		BIT(V4L2_MPEG_VIDEO_HEVC_LEVEL_2) |
 		BIT(V4L2_MPEG_VIDEO_HEVC_LEVEL_2_1) |
@@ -4330,8 +4332,9 @@ static struct msm_platform_inst_capability instance_data_parrot_v2[] = {
 		BIT(V4L2_MPEG_VIDEO_HEVC_LEVEL_3_1) |
 		BIT(V4L2_MPEG_VIDEO_HEVC_LEVEL_4) |
 		BIT(V4L2_MPEG_VIDEO_HEVC_LEVEL_4_1) |
-		BIT(V4L2_MPEG_VIDEO_HEVC_LEVEL_5),
-		V4L2_MPEG_VIDEO_HEVC_LEVEL_5,
+		BIT(V4L2_MPEG_VIDEO_HEVC_LEVEL_5) |
+		BIT(V4L2_MPEG_VIDEO_HEVC_LEVEL_5_1),
+		V4L2_MPEG_VIDEO_HEVC_LEVEL_5_1,
 		V4L2_CID_MPEG_VIDEO_HEVC_LEVEL,
 		HFI_PROP_LEVEL,
 		CAP_FLAG_ROOT | CAP_FLAG_OUTPUT_PORT | CAP_FLAG_MENU,
@@ -4668,7 +4671,7 @@ static struct msm_platform_inst_capability instance_data_parrot_v2[] = {
 		V4L2_CID_MPEG_VIDC_METADATA_SEI_CONTENT_LIGHT_LEVEL,
 		HFI_PROP_SEI_CONTENT_LIGHT_LEVEL},
 
-	{META_HDR10PLUS, DEC, HEVC|HEIC,
+	{META_HDR10PLUS, DEC | ENC, HEVC|HEIC,
 		V4L2_MPEG_MSM_VIDC_DISABLE, V4L2_MPEG_MSM_VIDC_ENABLE,
 		1, V4L2_MPEG_MSM_VIDC_DISABLE,
 		V4L2_CID_MPEG_VIDC_METADATA_HDR10PLUS,
@@ -4801,8 +4804,8 @@ static struct msm_platform_inst_capability instance_data_parrot_v2[] = {
 		NULL, msm_vidc_set_u32},
 	{PIX_FMTS, ENC, HEIC,
 		MSM_VIDC_FMT_NV12,
-		MSM_VIDC_FMT_NV21,
-		MSM_VIDC_FMT_NV12 | MSM_VIDC_FMT_NV21,
+		MSM_VIDC_FMT_NV12,
+		MSM_VIDC_FMT_NV12,
 		MSM_VIDC_FMT_NV12,
 		0, 0,
 		CAP_FLAG_ROOT,

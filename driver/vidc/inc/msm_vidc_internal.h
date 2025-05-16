@@ -7,7 +7,6 @@
 #ifndef _MSM_VIDC_INTERNAL_H_
 #define _MSM_VIDC_INTERNAL_H_
 
-#include <linux/version.h>
 #include <linux/bits.h>
 #include <linux/workqueue.h>
 #include <media/v4l2-dev.h>
@@ -54,6 +53,7 @@
 #define MIN_HEVC_SLICE_WIDTH                384
 #define MIN_AVC_SLICE_WIDTH                 192
 #define MIN_SLICE_HEIGHT                    128
+#define MAX_BITRATE_BOOST                    25
 #define MAX_SUPPORTED_MIN_QUALITY            70
 #define MIN_CHROMA_QP_OFFSET                -12
 #define MAX_CHROMA_QP_OFFSET                  0
@@ -80,15 +80,9 @@
 #define NUM_MBS_PER_FRAME(__height, __width) \
 	((ALIGN(__height, 16) / 16) * (ALIGN(__width, 16) / 16))
 
-#ifdef V4L2_CTRL_CLASS_CODEC
-#define IS_PRIV_CTRL(idx) ( \
-	(V4L2_CTRL_ID2WHICH(idx) == V4L2_CTRL_CLASS_CODEC) && \
-	V4L2_CTRL_DRIVER_PRIV(idx))
-#else
 #define IS_PRIV_CTRL(idx) ( \
 	(V4L2_CTRL_ID2WHICH(idx) == V4L2_CTRL_CLASS_MPEG) && \
 	V4L2_CTRL_DRIVER_PRIV(idx))
-#endif
 
 #define BUFFER_ALIGNMENT_SIZE(x) x
 #define NUM_MBS_360P (((480 + 15) >> 4) * ((360 + 15) >> 4))
@@ -371,7 +365,7 @@ enum msm_vidc_inst_capability_type {
 	SLICE_INTERFACE,
 	HEADER_MODE,
 	PREPEND_SPSPPS_TO_IDR,
-	VUI_TIMING_INFO,
+	DISABLE_VUI_TIMING_INFO,
 	META_SEQ_HDR_NAL,
 	WITHOUT_STARTCODE,
 	NAL_LENGTH_FIELD,
@@ -780,9 +774,6 @@ struct msm_vidc_alloc {
 	u8                          secure:1;
 	u8                          map_kernel:1;
 	struct dma_buf             *dmabuf;
-#if (KERNEL_VERSION(5, 15, 0) <= LINUX_VERSION_CODE)
-	struct dma_buf_map          dmabuf_map;
-#endif
 	void                       *kvaddr;
 };
 

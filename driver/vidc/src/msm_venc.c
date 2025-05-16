@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #include <media/v4l2_vidc_extensions.h>
@@ -32,6 +31,7 @@ static const u32 msm_venc_output_set_prop[] = {
 	HFI_PROP_CROP_OFFSETS,
 	HFI_PROP_BUFFER_HOST_MAX_COUNT,
 	HFI_PROP_CSC,
+	HFI_PROP_DISABLE_VUI_TIMING_INFO,
 };
 
 static const u32 msm_venc_input_subscribe_for_properties[] = {
@@ -64,10 +64,6 @@ struct msm_venc_prop_type_handle {
 static int msm_venc_codec_change(struct msm_vidc_inst *inst, u32 v4l2_codec)
 {
 	int rc = 0;
-	bool create_inst_handler = false;
-
-	if (!inst->codec)
-		create_inst_handler = true;
 
 	if (inst->codec && inst->fmts[OUTPUT_PORT].fmt.pix_mp.pixelformat == v4l2_codec)
 		return 0;
@@ -86,15 +82,13 @@ static int msm_venc_codec_change(struct msm_vidc_inst *inst, u32 v4l2_codec)
 	if (rc)
 		goto exit;
 
-	if (create_inst_handler) {
-		rc = msm_vidc_ctrl_handler_init(inst, true);
-		if(rc)
-			goto exit;
-	} else {
-		rc = msm_vidc_ctrl_handler_update(inst);
-		if(rc)
-			goto exit;
-	}
+	rc = msm_vidc_ctrl_deinit(inst);
+	if (rc)
+		goto exit;
+
+	rc = msm_vidc_ctrl_init(inst);
+	if (rc)
+		goto exit;
 
 	rc = msm_vidc_update_buffer_count(inst, INPUT_PORT);
 	if (rc)
@@ -413,11 +407,6 @@ static int msm_venc_set_csc(struct msm_vidc_inst* inst,
 	msm_vidc_update_cap_value(inst, CSC,
 		msm_venc_csc_required(inst) ? 1 : 0, __func__);
 
-	if (!inst->capabilities->cap[CSC].hfi_id) {
-		i_vpr_h(inst, "%s: HFI_PROP_CSC is not supported\n", __func__);
-		return 0;
-	}
-
 	csc = inst->capabilities->cap[CSC].value;
 	i_vpr_h(inst, "%s: csc: %u\n", __func__, csc);
 	rc = venus_hfi_session_property(inst,
@@ -433,6 +422,28 @@ static int msm_venc_set_csc(struct msm_vidc_inst* inst,
 	return 0;
 }
 
+static int msm_venc_set_disable_vui_timing_info(struct msm_vidc_inst *inst,
+	enum msm_vidc_port_type port)
+{
+	int rc = 0;
+	u32 enable = 0;
+	if (port != OUTPUT_PORT) {
+		i_vpr_e(inst, "%s: invalid port %d\n", __func__, port);
+		return -EINVAL;
+	}
+	enable = inst->capabilities->cap[DISABLE_VUI_TIMING_INFO].value;
+	i_vpr_h(inst, "%s: DISABLE_VUI_TIMING_INFO: %u\n", __func__, enable);
+	rc = venus_hfi_session_property(inst,
+		HFI_PROP_DISABLE_VUI_TIMING_INFO,
+		HFI_HOST_FLAGS_NONE,
+		get_hfi_port(inst, port),
+		HFI_PAYLOAD_U32,
+		&enable,
+		sizeof(u32));
+	if (rc)
+		return rc;
+	return 0;
+}
 static int msm_venc_set_quality_mode(struct msm_vidc_inst *inst)
 {
 	int rc = 0;
@@ -507,6 +518,7 @@ static int msm_venc_set_output_properties(struct msm_vidc_inst *inst)
 		{HFI_PROP_CROP_OFFSETS,               msm_venc_set_crop_offsets            },
 		{HFI_PROP_BUFFER_HOST_MAX_COUNT,      msm_venc_set_host_max_buf_count      },
 		{HFI_PROP_CSC,                        msm_venc_set_csc                     },
+		{HFI_PROP_DISABLE_VUI_TIMING_INFO,    msm_venc_set_disable_vui_timing_info },
 	};
 
 	if (!inst) {
@@ -1036,10 +1048,6 @@ int msm_venc_streamon_output(struct msm_vidc_inst *inst)
 	if (rc)
 		goto error;
 
-	rc = msm_vidc_set_vui_timing_info(inst, VUI_TIMING_INFO);
-	if (rc)
-		goto error;
-
 	rc = msm_venc_property_subscription(inst, OUTPUT_PORT);
 	if (rc)
 		goto error;
@@ -1380,6 +1388,9 @@ int msm_venc_s_fmt(struct msm_vidc_inst *inst, struct v4l2_format *f)
 
 	if (f->type == INPUT_MPLANE) {
 		rc = msm_venc_s_fmt_input(inst, f);
+		if (rc)
+			goto exit;
+		rc = msm_vidc_check_session_supported(inst);
 		if (rc)
 			goto exit;
 	} else if (f->type == INPUT_META_PLANE) {
@@ -1906,7 +1917,7 @@ int msm_venc_inst_deinit(struct msm_vidc_inst *inst)
 		d_vpr_e("%s: invalid params\n", __func__);
 		return -EINVAL;
 	}
-	rc = msm_vidc_ctrl_handler_deinit(inst);
+	rc = msm_vidc_ctrl_deinit(inst);
 	if (rc)
 		return rc;
 

@@ -1,7 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 /*
  * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #ifndef __H_HFI_PROPERTY_H__
@@ -495,7 +494,6 @@ enum hfi_nal_length_field_type {
 #define HFI_PROP_SUBFRAME_INPUT                                 0x03000183
 
 #define HFI_PROP_DISABLE_VUI_TIMING_INFO                        0x03000194
-
 #define HFI_PROP_END                                            0x03FFFFFF
 
 #define HFI_SESSION_ERROR_BEGIN                                 0x04000000
@@ -511,8 +509,6 @@ enum hfi_nal_length_field_type {
 #define HFI_ERROR_INSUFFICIENT_RESOURCES                        0x04000005
 
 #define HFI_ERROR_BUFFER_NOT_SET                                0x04000006
-
-#define HFI_ERROR_STREAM_UNSUPPORTED                            0x04000008
 
 #define HFI_SESSION_ERROR_END                                   0x04FFFFFF
 

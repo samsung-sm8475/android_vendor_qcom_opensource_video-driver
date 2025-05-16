@@ -1,7 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0 WITH Linux-syscall-note */
 /*
  * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #ifndef __V4l2_VIDC_EXTENSIONS_H__
@@ -53,11 +52,7 @@
 #endif
 
 /* vendor controls start */
-#ifdef V4L2_CTRL_CLASS_CODEC
-#define V4L2_CID_MPEG_VIDC_BASE (V4L2_CTRL_CLASS_CODEC | 0x2000)
-#else
-#define V4L2_CID_MPEG_VIDC_BASE (V4L2_CTRL_CLASS_MPEG | 0x2000)
-#endif
+#define V4L2_CID_MPEG_VIDC_BASE                 (V4L2_CTRL_CLASS_MPEG | 0x2000)
 
 #define V4L2_MPEG_MSM_VIDC_DISABLE 0
 #define V4L2_MPEG_MSM_VIDC_ENABLE 1
@@ -146,8 +141,7 @@ enum v4l2_mpeg_vidc_blur_types {
 	(V4L2_CID_MPEG_VIDC_BASE + 0x30)
 /* Decoder Timestamp Reorder control */
 #define V4L2_CID_MPEG_VIDC_TS_REORDER           (V4L2_CID_MPEG_VIDC_BASE + 0x31)
-/* Encoder Disable VUI Timing Info */
-#define V4L2_CID_MPEG_VIDC_VUI_TIMING_INFO                                   \
+#define V4L2_CID_MPEG_VIDEO_DISABLE_VUI_TIMING_INFO                           \
 	(V4L2_CID_MPEG_VIDC_BASE + 0x32)
 
 /* Deprecate below controls once availble in gki and gsi bionic header */

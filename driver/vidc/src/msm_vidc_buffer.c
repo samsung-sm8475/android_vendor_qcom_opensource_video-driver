@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
- * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2023 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #include "msm_media_info.h"
@@ -64,27 +63,25 @@ u32 msm_vidc_output_min_count(struct msm_vidc_inst *inst)
 	if (is_thumbnail_session(inst))
 		return 1;
 
-	if (is_encode_session(inst))
-		return MIN_ENC_OUTPUT_BUFFERS;
-
-	switch (inst->codec) {
-	case MSM_VIDC_H264:
-	case MSM_VIDC_HEVC:
-		output_min_count = 4;
-		break;
-	case MSM_VIDC_VP9:
-		output_min_count = 9;
-		break;
-	case MSM_VIDC_HEIC:
-		output_min_count = 3;
-		break;
-	default:
-		output_min_count = 4;
+	if (is_decode_session(inst)) {
+		switch (inst->codec) {
+		case MSM_VIDC_H264:
+		case MSM_VIDC_HEVC:
+			output_min_count = 4;
+			break;
+		case MSM_VIDC_VP9:
+			output_min_count = 9;
+			break;
+		case MSM_VIDC_HEIC:
+			output_min_count = 3;
+			break;
+		default:
+			output_min_count = 4;
+		}
+	} else {
+		output_min_count = MIN_ENC_OUTPUT_BUFFERS;
+		//todo: reduce heic count to 2, once HAL side cushion is added
 	}
-
-	if (inst->buffers.output.min_count)
-		output_min_count = max(inst->buffers.output.min_count,
-							output_min_count);
 
 	return output_min_count;
 }
@@ -305,11 +302,6 @@ u32 msm_vidc_encoder_output_size(struct msm_vidc_inst *inst)
 	u32 width, height;
 	struct v4l2_format *f;
 
-	if (!inst || !inst->capabilities) {
-		d_vpr_e("%s: invalid params\n", __func__);
-		return 0;
-	}
-
 	f = &inst->fmts[OUTPUT_PORT];
 	/*
 	 * Encoder output size calculation: 32 Align width/height
@@ -327,8 +319,7 @@ u32 msm_vidc_encoder_output_size(struct msm_vidc_inst *inst)
 	frame_size = (width * height * 3);
 
 	/* Image session: 2 x yuv size */
-	if (is_image_session(inst) ||
-		inst->capabilities->cap[BITRATE_MODE].value == V4L2_MPEG_VIDEO_BITRATE_MODE_CQ)
+	if (is_image_session(inst))
 		goto skip_calc;
 
 	if (mbs_per_frame <= NUM_MBS_360P)

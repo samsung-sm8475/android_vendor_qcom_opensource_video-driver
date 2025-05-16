@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2023, Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #include <linux/of_platform.h>
@@ -17,24 +17,14 @@
 #include "msm_vidc_dt.h"
 #include "msm_vidc_debug.h"
 #include "msm_vidc_internal.h"
-#include "msm_vidc_driver.h"
 #if defined(CONFIG_MSM_VIDC_WAIPIO)
 #include "msm_vidc_waipio.h"
 #endif
 #if defined(CONFIG_MSM_VIDC_DIWALI)
 #include "msm_vidc_diwali.h"
 #endif
-#if defined(CONFIG_MSM_VIDC_KHAJE)
-#include "msm_vidc_khaje.h"
-#endif
-#if defined(CONFIG_MSM_VIDC_MONACO)
-#include "msm_vidc_monaco.h"
-#endif
 #if defined(CONFIG_MSM_VIDC_PARROT)
 #include "msm_vidc_parrot.h"
-#endif
-#if defined(CONFIG_MSM_VIDC_RAVELIN)
-#include "msm_vidc_ravelin.h"
 #endif
 #if defined(CONFIG_MSM_VIDC_NEO)
 #include "msm_vidc_neo.h"
@@ -42,9 +32,7 @@
 #if defined(CONFIG_MSM_VIDC_IRIS2) || defined(CONFIG_MSM_VIDC_IRIS3)
 #include "msm_vidc_iris2.h"
 #endif
-#if defined(CONFIG_MSM_VIDC_AR50LT)
-#include "msm_vidc_ar50lt.h"
-#endif
+
 /*
  * Custom conversion coefficients for resolution: 176x144 negative
  * coeffs are converted to s4.9 format
@@ -52,12 +40,12 @@
  * 3x3 transformation matrix coefficients in s4.9 fixed point format
  */
 u32 vpe_csc_custom_matrix_coeff[MAX_MATRIX_COEFFS] = {
-	440, 8140, 8098, 0, 460, 52, 0, 34, 463
+	0x1BE, 0x1FCC, 0x1FA1, 0, 0x1CC, 0x34, 0, 0x22, 0x1CF
 };
 
 /* offset coefficients in s9 fixed point format */
 u32 vpe_csc_custom_bias_coeff[MAX_BIAS_COEFFS] = {
-	53, 0, 4
+	0x33, 0, 0x4
 };
 
 /* clamping value for Y/U/V([min,max] for Y/U/V) */
@@ -170,10 +158,6 @@ static struct vb2_mem_ops msm_vb2_mem_ops = {
 	.unmap_dmabuf                   = msm_vb2_unmap_dmabuf,
 };
 
-static struct msm_vidc_platform_ops msm_platform_ops = {
-	.buffer_region                  = msm_vidc_get_buffer_region,
-};
-
 static int msm_vidc_init_ops(struct msm_vidc_core *core)
 {
 	if (!core) {
@@ -188,7 +172,6 @@ static int msm_vidc_init_ops(struct msm_vidc_core *core)
 	core->v4l2_ctrl_ops = &msm_v4l2_ctrl_ops;
 	core->vb2_ops = &msm_vb2_ops;
 	core->vb2_mem_ops = &msm_vb2_mem_ops;
-	core->platform_ops = &msm_platform_ops;
 
 	return 0;
 }
@@ -224,24 +207,6 @@ static int msm_vidc_deinit_platform_variant(struct msm_vidc_core *core, struct d
 	}
 #endif
 
-#if defined(CONFIG_MSM_VIDC_KHAJE)
-	if (of_device_is_compatible(dev->of_node, "qcom,msm-vidc-khaje")) {
-		rc = msm_vidc_deinit_platform_khaje(core, dev);
-		if (rc)
-			d_vpr_e("%s: failed with %d\n", __func__, rc);
-		return rc;
-	}
-#endif
-
-#if defined(CONFIG_MSM_VIDC_MONACO)
-	if (of_device_is_compatible(dev->of_node, "qcom,msm-vidc-monaco")) {
-		rc = msm_vidc_deinit_platform_monaco(core, dev);
-		if (rc)
-			d_vpr_e("%s: failed with %d\n", __func__, rc);
-		return rc;
-	}
-#endif
-
 #if defined(CONFIG_MSM_VIDC_NEO)
 	if (of_device_is_compatible(dev->of_node, "qcom,msm-vidc-neo")) {
 		rc = msm_vidc_deinit_platform_neo(core, dev);
@@ -260,25 +225,12 @@ static int msm_vidc_deinit_platform_variant(struct msm_vidc_core *core, struct d
 		return rc;
 	}
 #endif
-#if defined(CONFIG_MSM_VIDC_RAVELIN)
-	if (of_device_is_compatible(dev->of_node, "qcom,msm-vidc-ravelin")) {
-		rc = msm_vidc_deinit_platform_ravelin(core, dev);
-		if (rc)
-			d_vpr_e("%s: failed msm-vidc-ravelin with %d\n",
-				__func__, rc);
-		return rc;
-	}
-#endif
 
 	return rc;
 }
 
 static int msm_vidc_init_platform_variant(struct msm_vidc_core *core, struct device *dev)
 {
-#if defined(CONFIG_MSM_VIDC_KHAJE)
-	struct msm_platform_core_capability *platform_data;
-	int i, num_platform_caps;
-#endif
 	int rc = -EINVAL;
 
 	if (!core || !dev) {
@@ -316,15 +268,6 @@ static int msm_vidc_init_platform_variant(struct msm_vidc_core *core, struct dev
 		return rc;
 	}
 #endif
-#if defined(CONFIG_MSM_VIDC_RAVELIN)
-	if (of_device_is_compatible(dev->of_node, "qcom,msm-vidc-ravelin")) {
-		rc = msm_vidc_init_platform_ravelin(core, dev);
-		if (rc)
-			d_vpr_e("%s: failed msm-vidc-ravelin with %d\n",
-				__func__, rc);
-		return rc;
-	}
-#endif
 
 #if defined(CONFIG_MSM_VIDC_NEO)
 	if (of_device_is_compatible(dev->of_node, "qcom,msm-vidc-neo")) {
@@ -332,43 +275,6 @@ static int msm_vidc_init_platform_variant(struct msm_vidc_core *core, struct dev
 		if (rc)
 			d_vpr_e("%s: failed msm-vidc-neo with %d\n",
 				__func__, rc);
-		return rc;
-	}
-#endif
-
-#if defined(CONFIG_MSM_VIDC_KHAJE)
-	if (of_device_is_compatible(dev->of_node, "qcom,msm-vidc-khaje")) {
-		rc = msm_vidc_init_platform_khaje(core, dev);
-		if (rc) {
-			d_vpr_e("%s: failed with %d\n", __func__, rc);
-			return rc;
-		}
-	}
-	if (of_device_is_compatible(dev->of_node, "qcom,msm-vidc-khaje-iot")) {
-		rc = msm_vidc_init_platform_khaje(core, dev);
-		if (rc) {
-			d_vpr_e("%s: failed with %d\n", __func__, rc);
-			return rc;
-		}
-		if (!core || !core->platform) {
-			d_vpr_e("%s: Invalid params\n", __func__);
-			return -EINVAL;
-		}
-		platform_data = core->platform->data.core_data;
-		num_platform_caps = core->platform->data.core_data_size;
-		for (i = 0; i < num_platform_caps && i < CORE_CAP_MAX; i++) {
-			if (platform_data[i].type == MAX_SESSION_COUNT)
-				platform_data[i].value = 4;
-		}
-	}
-	return rc;
-#endif
-
-#if defined(CONFIG_MSM_VIDC_MONACO)
-	if (of_device_is_compatible(dev->of_node, "qcom,msm-vidc-monaco")) {
-		rc = msm_vidc_init_platform_monaco(core, dev);
-		if (rc)
-			d_vpr_e("%s: failed with %d\n", __func__, rc);
 		return rc;
 	}
 #endif
@@ -404,14 +310,7 @@ static int msm_vidc_deinit_vpu(struct msm_vidc_core *core, struct device *dev)
 				__func__, rc);
 	}
 #endif
-#if defined(CONFIG_MSM_VIDC_AR50LT)
-	if (of_device_is_compatible(dev->of_node, "qcom,msm-vidc-ar50lt")) {
-		rc = msm_vidc_deinit_ar50lt(core);
-		if (rc)
-			d_vpr_e("%s: failed with %d\n", __func__, rc);
-		return rc;
-	}
-#endif
+
 	return rc;
 }
 
@@ -441,14 +340,7 @@ static int msm_vidc_init_vpu(struct msm_vidc_core *core, struct device *dev)
 				__func__, rc);
 	}
 #endif
-#if defined(CONFIG_MSM_VIDC_AR50LT)
-	if (of_device_is_compatible(dev->of_node, "qcom,msm-vidc-ar50lt")) {
-		rc = msm_vidc_init_ar50lt(core);
-		if (rc)
-			d_vpr_e("%s: failed with %d\n", __func__, rc);
-		return rc;
-	}
-#endif
+
 	return rc;
 }
 
@@ -473,14 +365,14 @@ int msm_vidc_deinit_platform(struct platform_device *pdev)
 	msm_vidc_deinit_vpu(core, &pdev->dev);
 	msm_vidc_deinit_platform_variant(core, &pdev->dev);
 
-	msm_vidc_vmem_free((void **)&core->platform);
+	kfree(core->platform);
 	return 0;
 }
 
 int msm_vidc_init_platform(struct platform_device *pdev)
 {
 	int rc = 0;
-	struct msm_vidc_platform *platform = NULL;
+	struct msm_vidc_platform *platform;
 	struct msm_vidc_core *core;
 
 	if (!pdev) {
@@ -497,10 +389,9 @@ int msm_vidc_init_platform(struct platform_device *pdev)
 		return -EINVAL;
 	}
 
-	rc = msm_vidc_vmem_alloc(sizeof(struct msm_vidc_platform),
-			(void **)&platform, __func__);
-	if (rc)
-		return rc;
+	platform = kzalloc(sizeof(struct msm_vidc_platform), GFP_KERNEL);
+	if (!platform)
+		return -ENOMEM;
 
 	core->platform = platform;
 	platform->core = core;
@@ -579,11 +470,9 @@ void msm_vidc_ddr_ubwc_config(
 		return;
 	}
 
-#if (KERNEL_VERSION(5, 15, 0) > LINUX_VERSION_CODE)
 	ddr_type = of_fdt_get_ddrtype();
 	if (ddr_type == -ENOENT)
 		d_vpr_e("Failed to get ddr type, use LPDDR5\n");
-#endif
 
 	if (platform_data->ubwc_config &&
 		(ddr_type == DDR_TYPE_LPDDR4 ||

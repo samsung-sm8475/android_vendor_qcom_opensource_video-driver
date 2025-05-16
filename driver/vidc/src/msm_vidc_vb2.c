@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
- * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
  * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
  */
 
@@ -39,32 +38,22 @@ struct vb2_queue *msm_vidc_get_vb2q(struct msm_vidc_inst *inst,
 	return q;
 }
 
-#if (KERNEL_VERSION(5, 15, 0) > LINUX_VERSION_CODE)
 void *msm_vb2_get_userptr(struct device *dev, unsigned long vaddr,
 			unsigned long size, enum dma_data_direction dma_dir)
 {
 	return (void *)0xdeadbeef;
 }
+
+void msm_vb2_put_userptr(void *buf_priv)
+{
+}
+
 void* msm_vb2_attach_dmabuf(struct device* dev, struct dma_buf* dbuf,
 	unsigned long size, enum dma_data_direction dma_dir)
 {
 	return (void*)0xdeadbeef;
 }
-#else
-void *msm_vb2_get_userptr(struct vb2_buffer *vb, struct device *dev,
-			unsigned long vaddr, unsigned long size)
-{
-	return (void *)0xdeadbeef;
-}
-void *msm_vb2_attach_dmabuf(struct vb2_buffer *vb, struct device *dev,
-	struct dma_buf *dbuf, unsigned long size)
-{
-	return (void *)0xdeadbeef;
-}
-#endif
-void msm_vb2_put_userptr(void *buf_priv)
-{
-}
+
 void msm_vb2_detach_dmabuf(void* buf_priv)
 {
 }

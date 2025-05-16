@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #include "hfi_packet.h"
@@ -400,9 +399,6 @@ int hfi_packet_sys_init(struct msm_vidc_core *core,
 	if (rc)
 		goto err_sys_init;
 
-	if (!core->platform->data.ubwc_config)
-		goto exit;
-
 	/* HFI_PROP_UBWC_MAX_CHANNELS */
 	payload = core->platform->data.ubwc_config->max_channels;
 	d_vpr_h("%s: ubwc max channels %d\n", __func__, payload);
@@ -501,7 +497,6 @@ int hfi_packet_sys_init(struct msm_vidc_core *core,
 	if (rc)
 		goto err_sys_init;
 
-exit:
 	d_vpr_h("System init packet created\n");
 	return rc;
 

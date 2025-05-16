@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-2.0-only
-BOARD_OPENSOURCE_DIR ?= vendor/qcom/opensource
-VIDEO_BLD_DIR := $(shell pwd)/$(BOARD_OPENSOURCE_DIR)/video-driver
+
+VIDEO_BLD_DIR := $(shell pwd)/vendor/qcom/opensource/video-driver
 VIDEO_SELECT := CONFIG_MSM_VIDC_V4L2=m
 
 # Build msm_video.ko
@@ -14,8 +14,8 @@ KBUILD_OPTIONS += $(VIDEO_SELECT)
 
 KBUILD_OPTIONS += KBUILD_EXTRA_SYMBOLS=$(shell pwd)/$(call intermediates-dir-for,DLKM,mmrm-module-symvers)/Module.symvers
 ###########################################################
-BOARD_COMMON_DIR ?= device/qcom/common
-DLKM_DIR   := $(BOARD_COMMON_DIR)/dlkm
+
+DLKM_DIR   := device/qcom/common/dlkm
 
 LOCAL_PATH := $(call my-dir)
 
